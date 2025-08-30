@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Robot Activation Console</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#111820;
+      --accent:#11b5e5;
+      --muted:#7a8a99;
+      --ok:#28a745;
+      --err:#e53935;
+      --text:#e6eef5;
+      --input:#0f141a;
+      --input-b:#1c2a36;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 70% -20%, #123, transparent), var(--bg);
+      color:var(--text);
+      display:flex; align-items:center; justify-content:center;
+      padding:24px;
+    }
+    .frame{
+      width:min(920px, 100%);
+      background:linear-gradient(180deg, #0f1720, #0b1118);
+      border:1px solid #1b2733;
+      border-radius:16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.02);
+      overflow:hidden;
+    }
+    header{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px; padding:18px 20px; border-bottom:1px solid #1b2733;
+      background:linear-gradient(180deg, #0c141c, #0a1016);
+    }
+    .title{
+      display:flex; align-items:center; gap:12px; font-weight:700;
+      letter-spacing:.3px;
+    }
+    .led{
+      width:12px; height:12px; border-radius:50%;
+      background:#223746; box-shadow:0 0 0 2px #0b141c inset, 0 0 8px transparent;
+      transition:.25s ease;
+    }
+    .led.on{ background:var(--accent); box-shadow:0 0 0 2px #0b141c inset, 0 0 12px var(--accent); }
+    .hint{ color:var(--muted); font-size:12px }
+    main{ padding:20px; display:grid; grid-template-columns:1fr 1fr; gap:16px }
+    @media (max-width: 760px){ main{ grid-template-columns:1fr } }
+    .field{
+      background:var(--panel); border:1px solid #1b2733; border-radius:12px; padding:14px;
+    }
+    label{ font-size:14px; color:#cfe4f5; display:block; margin-bottom:8px }
+    .input{
+      display:flex; align-items:center; gap:8px;
+      background:var(--input); border:1px solid var(--input-b);
+      border-radius:10px; padding:10px 12px;
+    }
+    .input input{
+      flex:1; background:transparent; border:0; outline:0; color:var(--text);
+      font-size:16px; letter-spacing:.3px;
+    }
+    .input kbd{ font-size:12px; color:var(--muted); border:1px solid #23313d; padding:2px 6px; border-radius:6px }
+    footer{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:14px 20px; border-top:1px solid #1b2733; background:#0b1118;
+    }
+    .actions{ display:flex; gap:10px; align-items:center }
+    button{
+      border:0; outline:0; padding:12px 16px; border-radius:10px; cursor:pointer;
+      background:var(--accent); color:#061018; font-weight:700; letter-spacing:.3px;
+      box-shadow:0 6px 20px rgba(17,181,229,.25);
+    }
+    button.secondary{
+      background:#17222c; color:#cfe4f5; font-weight:600; box-shadow:none; border:1px solid #23313d;
+    }
+    .msg{ font-weight:700 }
+    .msg.ok{ color:var(--ok) }
+    .msg.err{ color:var(--err) }
+    .note{ font-size:12px; color:var(--muted) }
+    .hidden{ display:none !important }
+  </style>
+</head>
+<body>
+  <div class="frame" role="application" aria-label="Robot Activation Console">
+    <header>
+      <div class="title"><div id="led" class="led" aria-hidden="true"></div> ROBOT ACTIVATION CONSOLE</div>
+      <div class="hint">Enter the five knowledge tokens in the correct order.</div>
+    </header>
+
+    <main>
+      <section class="field">
+        <label for="a1">1) Wire order <span class="note">(e.g., red-green-blue)</span></label>
+        <div class="input"><input id="a1" autocomplete="off" placeholder="type here…" /></div>
+      </section>
+
+      <section class="field">
+        <label for="a2">2) Boot command <span class="note">(e.g., boot-robot)</span></label>
+        <div class="input"><input id="a2" autocomplete="off" placeholder="type here…" /></div>
+      </section>
+
+      <section class="field">
+        <label for="a3">3) Sensor calibration <span class="note">(e.g., gyro-45)</span></label>
+        <div class="input"><input id="a3" autocomplete="off" placeholder="type here…" /></div>
+      </section>
+
+      <section class="field">
+        <label for="a4">4) Power sequence rule <span class="note">(e.g., battery-last)</span></label>
+        <div class="input"><input id="a4" autocomplete="off" placeholder="type here…" /></div>
+      </section>
+
+      <section class="field" style="grid-column:1 / -1;">
+        <label for="a5">5) Missing part code <span class="note">(e.g., bolt-7)</span></label>
+        <div class="input"><input id="a5" autocomplete="off" placeholder="type here…" /></div>
+      </section>
+    </main>
+
+    <footer>
+      <div id="status" class="msg">Awaiting input…</div>
+      <div class="actions">
+        <button id="check" aria-label="Check answers">POWER ON</button>
+        <button id="reset" class="secondary" aria-label="Reset inputs">Reset</button>
+        <a id="continueLink" href="#" target="_top" class="hidden">
+          <button class="secondary" aria-label="Continue">Continue</button>
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // =========================
+    // CONFIGURATION
+    // =========================
+    // Define the exact correct tokens. Edit these to your real answers.
+    const KEY = [
+      "red-green-blue",
+      "boot-robot",
+      "gyro-45",
+      "battery-last",
+      "bolt-7"
+    ];
+
+    // Accept synonyms/variants for each index (optional).
+    // Add lowercase variants you want to accept.
+    const SYNONYMS = {
+      0: ["red green blue", "r-g-b", "rgb"], // wire order
+      1: ["boot robot", "bootrobot", "init-robot", "start-robot"],
+      2: ["gyro45", "gyro 45", "gyroscope-45", "gyroscope 45"],
+      3: ["battery last", "connect-battery-last", "batt-last"],
+      4: ["bolt7", "bolt 7", "module-bolt-7"]
+    };
+
+    // After success, send player to next Genially page (optional).
+    // Put your Genially page URL here; leave empty to keep them on the console.
+    const CONTINUE_URL = "";
+
+    // Normalization: lowercases, trims, replaces spaces/underscores with hyphens,
+    // collapses multiple separators. This makes inputs more forgiving.
+    function norm(s){
+      return (s||"")
+        .toLowerCase()
+        .trim()
+        .replace(/[_\s]+/g, "-")
+        .replace(/-+/g, "-");
+    }
+
+    function okMatch(val, index){
+      const v = norm(val);
+      if (v === KEY[index]) return true;
+      const list = SYNONYMS[index] || [];
+      for (const alt of list){
+        if (v === norm(alt)) return true;
+      }
+      return false;
+    }
+
+    const el = (id)=>document.getElementById(id);
+    const inputs = [el('a1'), el('a2'), el('a3'), el('a4'), el('a5')];
+    const status = el('status');
+    const led = el('led');
+    const checkBtn = el('check');
+    const resetBtn = el('reset');
+    const continueLink = el('continueLink');
+
+    function setStatus(text, ok){
+      status.textContent = text;
+      status.className = 'msg ' + (ok ? 'ok' : 'err');
+      led.classList.toggle('on', !!ok);
+    }
+
+    checkBtn.addEventListener('click', () => {
+      const vals = inputs.map(i => i.value);
+      const ok = vals.every((v,i)=> okMatch(v,i));
+
+      if (ok){
+        setStatus("SUCCESS: Robot fixed.", true);
+        if (CONTINUE_URL){
+          continueLink.href = CONTINUE_URL;
+          continueLink.classList.remove('hidden');
+        } else {
+          continueLink.classList.add('hidden');
+        }
+      } else {
+        setStatus("ERROR: Activation failed. Try again.", false);
+        continueLink.classList.add('hidden');
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      inputs.forEach(i => i.value = '');
+      status.textContent = 'Awaiting input…';
+      status.className = 'msg';
+      led.classList.remove('on');
+      continueLink.classList.add('hidden');
+      inputs[0].focus();
+    });
+
+    // Autofocus first input for usability
+    inputs[0].focus();
+  </script>
+</body>
+</html>
